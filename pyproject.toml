@@ -1,0 +1,178 @@
+[tool.briefcase]
+project_name = "Excel Color Manager"
+bundle = "com.excelcolormanager"
+version = "0.1.0"
+url = "https://github.com/user/excel-color-manager"
+author = "User"
+author_email = "user@example.com"
+
+[tool.briefcase.app.excel_color_manager]
+formal_name = "Excel Color Manager"
+description = "Application de manipulation de couleurs dans fichiers Excel"
+long_description = """Une application de bureau développée avec Beeware/Toga pour manipuler les couleurs dans les fichiers Excel de manière intuitive."""
+# icon = "src/excel_color_manager/resources/excel_color_manager"  # Décommentez si vous avez une icône
+sources = [
+    "src/excel_color_manager",
+]
+test_sources = [
+    "tests",
+]
+
+requires = [
+    "toga>=0.4.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+]
+
+test_requires = [
+    "pytest",
+]
+
+[tool.briefcase.app.excel_color_manager.macOS]
+requires = [
+    "toga-cocoa>=0.4.0",
+    "std-nslog~=1.0.0",
+]
+
+[tool.briefcase.app.excel_color_manager.linux]
+requires = [
+    "toga-gtk>=0.4.0",
+]
+system_requires = [
+    "gir1.2-webkit2-4.0",
+    "libgirepository1.0-dev",
+    "libcairo2-dev",
+    "libpango1.0-dev",
+    "libwebkit2gtk-4.0-37",
+    "gir1.2-gtk-3.0",
+]
+
+[tool.briefcase.app.excel_color_manager.windows]
+requires = [
+    "toga-winforms>=0.4.0",
+]
+
+# Configuration pour générer un MSI Windows
+system_installer = true
+# icon = "src/excel_color_manager/resources/excel_color_manager"  # Décommentez si vous avez une icône
+
+[tool.briefcase.app.excel_color_manager.iOS]
+requires = [
+    "toga-iOS>=0.4.0",
+    "std-nslog~=1.0.0",
+]
+
+[tool.briefcase.app.excel_color_manager.android]
+requires = [
+    "toga-android>=0.4.0",
+]
+
+[tool.briefcase.app.excel_color_manager.web]
+requires = [
+    "toga-web>=0.4.0",
+]
+style_framework = "Shoelace v2.3"
+
+[build-system]
+requires = [
+    "setuptools>=60",
+    "setuptools-scm>=8.0",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "excel_color_manager"
+version = "0.1.0"
+description = "Application de manipulation de couleurs dans fichiers Excel"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "User", email = "user@example.com"},
+]
+keywords = [
+    "excel",
+    "color",
+    "manipulation",
+    "beeware",
+    "toga",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Office Suites",
+]
+dependencies = [
+    "toga>=0.4.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "briefcase>=0.3.0",
+    "pytest",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/user/excel-color-manager"
+Documentation = "https://github.com/user/excel-color-manager/blob/main/README.md"
+"Bug Tracker" = "https://github.com/user/excel-color-manager/issues"
+"Source Code" = "https://github.com/user/excel-color-manager"
+
+[project.scripts]
+excel_color_manager = "excel_color_manager.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+warn_no_return = true
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = ["openpyxl.*", "pandas.*", "toga.*"]
+ignore_missing_imports = true
+ignore_errors = true
+
