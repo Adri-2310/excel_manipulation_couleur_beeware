@@ -1,18 +1,18 @@
 [tool.briefcase]
-project_name = "Excel Color Manager"
-bundle = "com.excelcolormanager"
+project_name = "ColorExcel"
+bundle = "com.colorexcel"
 version = "0.1.0"
-url = "https://github.com/user/excel-color-manager"
+url = "https://github.com/user/colorexcel"
 author = "User"
 author_email = "user@example.com"
 
-[tool.briefcase.app.excel_color_manager]
-formal_name = "Excel Color Manager"
+[tool.briefcase.app.colorexcel]
+formal_name = "ColorExcel"
 description = "Application de manipulation de couleurs dans fichiers Excel"
 long_description = """Une application de bureau développée avec Beeware/Toga pour manipuler les couleurs dans les fichiers Excel de manière intuitive."""
-# icon = "src/excel_color_manager/resources/excel_color_manager"  # Décommentez si vous avez une icône
+# icon = "src/colorexcel/resources/colorexcel"  # Décommentez si vous avez une icône
 sources = [
-    "src/excel_color_manager",
+    "src/colorexcel",
 ]
 test_sources = [
     "tests",
@@ -28,13 +28,13 @@ test_requires = [
     "pytest",
 ]
 
-[tool.briefcase.app.excel_color_manager.macOS]
+[tool.briefcase.app.colorexcel.macOS]
 requires = [
     "toga-cocoa>=0.4.0",
     "std-nslog~=1.0.0",
 ]
 
-[tool.briefcase.app.excel_color_manager.linux]
+[tool.briefcase.app.colorexcel.linux]
 requires = [
     "toga-gtk>=0.4.0",
 ]
@@ -47,27 +47,27 @@ system_requires = [
     "gir1.2-gtk-3.0",
 ]
 
-[tool.briefcase.app.excel_color_manager.windows]
+[tool.briefcase.app.colorexcel.windows]
 requires = [
     "toga-winforms>=0.4.0",
 ]
 
-# Configuration pour générer un MSI Windows
-system_installer = true
-# icon = "src/excel_color_manager/resources/excel_color_manager"  # Décommentez si vous avez une icône
+# Si vous voulez spécifier des options d'empaquetage
+packaging_format = "msi"  # ou "zip" pour un portable
+# icon = "src/colorexcel/resources/colorexcel"  # Décommentez si vous avez une icône
 
-[tool.briefcase.app.excel_color_manager.iOS]
+[tool.briefcase.app.colorexcel.iOS]
 requires = [
     "toga-iOS>=0.4.0",
     "std-nslog~=1.0.0",
 ]
 
-[tool.briefcase.app.excel_color_manager.android]
+[tool.briefcase.app.colorexcel.android]
 requires = [
     "toga-android>=0.4.0",
 ]
 
-[tool.briefcase.app.excel_color_manager.web]
+[tool.briefcase.app.colorexcel.web]
 requires = [
     "toga-web>=0.4.0",
 ]
@@ -82,7 +82,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "excel_color_manager"
+name = "colorexcel"
 version = "0.1.0"
 description = "Application de manipulation de couleurs dans fichiers Excel"
 readme = "README.md"
@@ -126,13 +126,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/user/excel-color-manager"
-Documentation = "https://github.com/user/excel-color-manager/blob/main/README.md"
-"Bug Tracker" = "https://github.com/user/excel-color-manager/issues"
-"Source Code" = "https://github.com/user/excel-color-manager"
+Homepage = "https://github.com/user/colorexcel"
+Documentation = "https://github.com/user/colorexcel/blob/main/README.md"
+"Bug Tracker" = "https://github.com/user/colorexcel/issues"
+"Source Code" = "https://github.com/user/colorexcel"
 
 [project.scripts]
-excel_color_manager = "excel_color_manager.__main__:main"
+colorexcel = "colorexcel.__main__:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

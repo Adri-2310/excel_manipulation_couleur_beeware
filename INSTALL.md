@@ -1,6 +1,6 @@
 # Guide d'Installation et de Génération MSI
 
-## Excel Color Manager - Application Beeware/Toga
+## ColorExcel - Application Beeware/Toga
 
 Ce guide vous explique comment installer, tester et générer un exécutable MSI pour Windows.
 
@@ -120,17 +120,17 @@ Cette commande compile l'application et prépare l'exécutable.
 Pour créer un installateur MSI :
 
 ```bash
-briefcase package windows --no-sign
+briefcase package windows --adhoc-sign
 ```
 
 **Options :**
-- `--no-sign` : Ne pas signer l'installateur (nécessaire car nous n'avons pas de certificat de signature)
+- `--adhoc-sign` : Signature adhoc sans certificat officiel (utilisé car nous n'avons pas de certificat de signature)
 
 **Résultat :**
 
 Le fichier MSI sera créé dans :
 ```
-windows\Excel_Color_Manager-0.1.0.msi
+dist\ColorExcel-0.1.0.msi
 ```
 
 ---
@@ -141,7 +141,7 @@ Double-cliquez sur le fichier `.msi` généré pour installer l'application.
 
 L'application sera installée dans :
 ```
-C:\Program Files\Excel Color Manager\
+C:\Program Files\ColorExcel\
 ```
 
 Un raccourci sera créé dans le menu Démarrer.
@@ -171,7 +171,7 @@ Après avoir modifié le code source :
 ```bash
 briefcase update windows
 briefcase build windows
-briefcase package windows --no-sign
+briefcase package windows --adhoc-sign
 ```
 
 ### Voir les logs détaillés
@@ -205,7 +205,7 @@ pip install pandas openpyxl toga
 
 Vérifiez les logs dans :
 ```
-C:\Users\<VotreNom>\AppData\Local\Excel Color Manager\Logs\
+C:\Users\<VotreNom>\AppData\Local\ColorExcel\Logs\
 ```
 
 ### Erreur "WiX Toolset not found" lors de la génération MSI
@@ -220,7 +220,7 @@ https://wixtoolset.org/
 ```
 excel_manipulation_couleur_beeware/
 ├── src/
-│   └── excel_color_manager/
+│   └── colorexcel/
 │       ├── __init__.py
 │       ├── __main__.py          # Interface Toga principale
 │       ├── logic.py              # Logique métier Excel
@@ -239,11 +239,11 @@ excel_manipulation_couleur_beeware/
 Pour ajouter une icône personnalisée à l'application :
 
 1. Créez ou obtenez une icône au format PNG (512x512 recommandé)
-2. Placez-la dans `src/excel_color_manager/resources/`
-3. Renommez-la `excel_color_manager.png`
+2. Placez-la dans `src/colorexcel/resources/`
+3. Renommez-la `colorexcel.png`
 4. Décommentez la ligne `icon` dans `pyproject.toml` :
    ```toml
-   icon = "src/excel_color_manager/resources/excel_color_manager"
+   icon = "src/colorexcel/resources/colorexcel"
    ```
 5. Recréez l'application : `briefcase create windows`
 

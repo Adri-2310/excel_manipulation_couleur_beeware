@@ -1,10 +1,10 @@
-# Excel Color Manager
+# ColorExcel
 
 Application de manipulation de couleurs dans fichiers Excel développée avec Beeware/Toga.
 
 ## Description
 
-Excel Color Manager est une application de bureau multiplateforme qui permet de manipuler les couleurs dans les fichiers Excel de manière intuitive. Développée avec le framework Beeware et la bibliothèque Toga, elle offre une interface graphique native sur Windows, macOS et Linux.
+ColorExcel est une application de bureau multiplateforme qui permet de manipuler les couleurs dans les fichiers Excel de manière intuitive. Développée avec le framework Beeware et la bibliothèque Toga, elle offre une interface graphique native sur Windows, macOS et Linux.
 
 ## Fonctionnalités
 
@@ -24,8 +24,8 @@ Excel Color Manager est une application de bureau multiplateforme qui permet de 
 
 1. Cloner le dépôt:
 ```bash
-git clone https://github.com/user/excel-color-manager.git
-cd excel-color-manager
+git clone https://github.com/user/colorexcel.git
+cd colorexcel
 ```
 
 2. Créer un environnement virtuel:
@@ -101,7 +101,7 @@ briefcase package linux
 ```
 excel_manipulation_couleur_beeware/
 ├── src/
-│   └── excel_color_manager/
+│   └── colorexcel/
 │       ├── __init__.py
 │       ├── __main__.py
 │       └── resources/

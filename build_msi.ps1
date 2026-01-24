@@ -1,8 +1,8 @@
 # Script PowerShell pour générer l'exécutable MSI
-# Excel Color Manager - Build Script
+# ColorExcel - Build Script
 
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host "  Excel Color Manager - Build MSI   " -ForegroundColor Cyan
+Write-Host "      ColorExcel - Build MSI        " -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
