@@ -10,7 +10,7 @@ author_email = "adrien.mertens@isbw.be"
 formal_name = "ColorExcel"
 description = "Application de manipulation de couleurs dans fichiers Excel"
 long_description = """Une application de bureau développée avec Beeware/Toga pour manipuler les couleurs dans les fichiers Excel de manière intuitive."""
-icon = "src/colorexcel/resources/icon.ico"
+icon = "src/colorexcel/resources/icon"
 sources = [
     "src/colorexcel",
 ]
@@ -53,8 +53,7 @@ requires = [
 ]
 
 # Si vous voulez spécifier des options d'empaquetage
-packaging_format = "msi"  # ou "zip" pour un portable
-icon = "src/colorexcel/resources/logo"
+packaging_format = "msi"
 
 [tool.briefcase.app.colorexcel.iOS]
 requires = [
