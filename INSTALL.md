@@ -8,74 +8,77 @@ Ce guide vous explique comment installer, tester et générer un exécutable MSI
 
 ## Prérequis
 
-- **Python 3.8 à 3.12** (vérifié avec `python --version`)
+- **Python >= 3.10** (recommandé: 3.12, vérifié avec `python --version`)
+- **uv** (gestionnaire de paquets et environnements ultra-rapide)
 - **Windows 10/11** (pour la génération MSI)
 - **Git** (optionnel, pour le versioning)
 
 ---
 
-## Étape 1: Créer l'environnement virtuel
+## Étape 0: Installer uv (si pas déjà installé)
 
-Ouvrez PowerShell ou CMD dans le dossier du projet :
+Ouvrez PowerShell et exécutez :
 
-```bash
-cd C:\Users\User\Documents\myCode\python\excel_manipulation_couleur_beeware
-```
-
-Créez un environnement virtuel :
-
-```bash
-python -m venv venv
-```
-
-Activez l'environnement virtuel :
-
-**Sur Windows (CMD):**
-```cmd
-venv\Scripts\activate
-```
-
-**Sur Windows (PowerShell):**
 ```powershell
-venv\Scripts\Activate.ps1
-```
-
-**Note:** Si vous avez une erreur d'exécution de scripts PowerShell, exécutez :
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
----
-
-## Étape 2: Installer Briefcase
-
-Une fois l'environnement virtuel activé, installez Briefcase :
-
-```bash
-pip install --upgrade pip
-pip install briefcase
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 Vérifiez l'installation :
-
-```bash
-briefcase --version
+```powershell
+uv --version
 ```
+
+Vous devriez voir quelque chose comme : `uv 0.9.27`
 
 ---
 
-## Étape 3: Tester l'application en mode développement
+## Étape 1: Créer l'environnement virtuel et installer les dépendances
+
+Ouvrez PowerShell dans le dossier du projet :
+
+```powershell
+cd C:\Users\User\Documents\myCode\python\excel_manipulation_couleur_beeware
+```
+
+Créez l'environnement virtuel et installez toutes les dépendances en une seule commande :
+
+```powershell
+uv venv
+uv sync --all-extras
+```
+
+`uv` va automatiquement :
+- Créer un environnement virtuel `.venv`
+- Installer Python si nécessaire
+- Installer toutes les dépendances (toga, pandas, openpyxl, briefcase, pytest, etc.)
+
+Vérifiez l'installation :
+
+```powershell
+uv run briefcase --version
+```
+
+Vous devriez voir : `0.3.26`
+
+---
+
+## Étape 2: Tester l'application en mode développement
 
 Pour tester l'application sans créer d'exécutable :
 
-```bash
-briefcase dev
+```powershell
+uv run briefcase dev
+```
+
+Ou utilisez le script fourni :
+```powershell
+.\run.ps1
 ```
 
 Cette commande :
-- Installe automatiquement toutes les dépendances (toga, pandas, openpyxl)
 - Lance l'application en mode développement
 - Permet de voir les logs et erreurs en direct
+- Utilise l'environnement virtuel géré par `uv`
 
 **Testez l'interface :**
 1. Choisissez un fichier Excel source (.xlsx ou .xls)
@@ -88,43 +91,44 @@ Cette commande :
 
 ---
 
-## Étape 4: Créer l'application Windows
+## Étape 3: Créer l'application Windows
 
 Pour créer une version Windows de l'application :
 
-```bash
-briefcase create windows
+```powershell
+uv run briefcase create windows
 ```
 
 Cette commande :
-- Crée un dossier `windows/` dans le projet
+- Crée un dossier `build/` dans le projet
 - Installe toutes les dépendances nécessaires
 - Prépare la structure de l'application Windows
 
 ---
 
-## Étape 5: Compiler l'application
+## Étape 4: Compiler l'application
 
 Pour compiler l'application :
 
-```bash
-briefcase build windows
+```powershell
+uv run briefcase build windows
 ```
 
 Cette commande compile l'application et prépare l'exécutable.
 
 ---
 
-## Étape 6: Générer le fichier MSI
+## Étape 5: Générer le fichier MSI
 
 Pour créer un installateur MSI :
 
-```bash
-briefcase package windows --adhoc-sign
+```powershell
+uv run briefcase package windows --no-sign
 ```
 
 **Options :**
-- `--adhoc-sign` : Signature adhoc sans certificat officiel (utilisé car nous n'avons pas de certificat de signature)
+- `--no-sign` : Pas de signature (utilisé car nous n'avons pas de certificat de signature)
+- `--adhoc-sign` : Alternative avec signature adhoc
 
 **Résultat :**
 
@@ -135,7 +139,7 @@ dist\ColorExcel-0.1.0.msi
 
 ---
 
-## Étape 7: Installer l'application sur Windows
+## Étape 6: Installer l'application sur Windows
 
 Double-cliquez sur le fichier `.msi` généré pour installer l'application.
 
@@ -152,14 +156,14 @@ Un raccourci sera créé dans le menu Démarrer.
 
 ### Nettoyer les builds précédents
 
-```bash
-briefcase clean windows
+```powershell
+uv run briefcase clean windows
 ```
 
 ### Tester l'application empaquetée sans MSI
 
-```bash
-briefcase run windows
+```powershell
+uv run briefcase run windows
 ```
 
 Cette commande lance l'application empaquetée directement sans créer de MSI.
@@ -168,19 +172,32 @@ Cette commande lance l'application empaquetée directement sans créer de MSI.
 
 Après avoir modifié le code source :
 
-```bash
-briefcase update windows
-briefcase build windows
-briefcase package windows --adhoc-sign
+```powershell
+uv run briefcase update windows
+uv run briefcase build windows
+uv run briefcase package windows --no-sign
 ```
 
 ### Voir les logs détaillés
 
 Ajoutez `-v` ou `-vv` pour plus de verbosité :
 
-```bash
-briefcase dev -vv
-briefcase build windows -v
+```powershell
+uv run briefcase dev -vv
+uv run briefcase build windows -v
+```
+
+### Ajouter une nouvelle dépendance au projet
+
+```powershell
+# Dépendance de production
+uv add nom-du-package
+
+# Dépendance de développement
+uv add --dev nom-du-package
+
+# Synchroniser l'environnement
+uv sync
 ```
 
 ---
@@ -189,16 +206,23 @@ briefcase build windows -v
 
 ### Erreur "Python version not compatible"
 
-Vérifiez que vous utilisez Python 3.8 à 3.12 :
-```bash
-python --version
+Vérifiez que vous utilisez Python >= 3.10 :
+```powershell
+uv run python --version
 ```
+
+`uv` peut installer automatiquement la bonne version de Python si nécessaire.
 
 ### Erreur lors de l'installation de pandas ou openpyxl
 
-Installez manuellement les dépendances :
-```bash
-pip install pandas openpyxl toga
+Essayez de resynchroniser les dépendances :
+```powershell
+uv sync --reinstall
+```
+
+Ou installez manuellement une dépendance spécifique :
+```powershell
+uv add pandas openpyxl toga
 ```
 
 ### L'application ne se lance pas après installation
@@ -224,12 +248,16 @@ excel_manipulation_couleur_beeware/
 │       ├── __init__.py
 │       ├── __main__.py          # Interface Toga principale
 │       ├── logic.py              # Logique métier Excel
-│       └── resources/            # Icônes (optionnel)
-├── pyproject.toml                # Configuration Briefcase
+│       └── resources/            # Icônes et ressources
+├── pyproject.toml                # Configuration du projet (dépendances, Briefcase)
+├── uv.lock                       # Fichier de verrouillage des dépendances
 ├── README.md                     # Documentation générale
 ├── INSTALL.md                    # Ce fichier
+├── run.ps1                       # Script de lancement rapide
 ├── .gitignore                    # Fichiers à ignorer par Git
-└── venv/                         # Environnement virtuel (créé par vous)
+├── .venv/                        # Environnement virtuel (créé par uv)
+├── build/                        # Builds de l'application
+└── dist/                         # Packages MSI générés
 ```
 
 ---
@@ -245,7 +273,27 @@ Pour ajouter une icône personnalisée à l'application :
    ```toml
    icon = "src/colorexcel/resources/colorexcel"
    ```
-5. Recréez l'application : `briefcase create windows`
+5. Recréez l'application : `uv run briefcase create windows`
+
+---
+
+## Pourquoi utiliser `uv` ?
+
+`uv` est un gestionnaire de paquets et d'environnements Python ultra-rapide (écrit en Rust) qui offre :
+
+- **Performance** : 10-100x plus rapide que `pip` pour l'installation de paquets
+- **Simplicité** : Une seule commande `uv sync` installe tout
+- **Reproductibilité** : Le fichier `uv.lock` garantit des installations identiques
+- **Gestion Python** : `uv` peut installer Python automatiquement si nécessaire
+- **Compatibilité** : Fonctionne parfaitement avec `pyproject.toml` et les outils standards
+
+**Comparaison :**
+
+| Opération | Méthode classique | Avec uv |
+|-----------|------------------|---------|
+| Créer venv + installer | `python -m venv venv` + `pip install -e ".[dev]"` | `uv venv` + `uv sync --all-extras` |
+| Lancer l'app | Activer venv + `briefcase dev` | `uv run briefcase dev` |
+| Ajouter un package | Activer venv + `pip install` + éditer `pyproject.toml` | `uv add package-name` |
 
 ---
 

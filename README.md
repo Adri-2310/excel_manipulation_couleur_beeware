@@ -15,8 +15,20 @@ ColorExcel est une application de bureau multiplateforme qui permet de manipuler
 
 ## Prérequis
 
-- Python >= 3.8 et < 3.13
-- pip (gestionnaire de paquets Python)
+- Python >= 3.10 (recommandé: 3.12)
+- uv (gestionnaire de paquets et environnements ultra-rapide)
+
+### Installation de uv
+
+**Windows (PowerShell):**
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**macOS/Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ## Installation
 
@@ -28,30 +40,13 @@ git clone https://github.com/user/colorexcel.git
 cd colorexcel
 ```
 
-2. Créer un environnement virtuel:
+2. Créer l'environnement virtuel et installer toutes les dépendances:
 ```bash
-python -m venv venv
+uv venv
+uv sync --all-extras
 ```
 
-3. Activer l'environnement virtuel:
-- Windows:
-  ```bash
-  venv\Scripts\activate
-  ```
-- macOS/Linux:
-  ```bash
-  source venv/bin/activate
-  ```
-
-4. Installer les dépendances:
-```bash
-pip install -e .
-```
-
-5. Installer Briefcase pour la génération d'applications:
-```bash
-pip install briefcase
-```
+C'est tout ! `uv` gère automatiquement l'environnement virtuel et toutes les dépendances (production + développement).
 
 ## Utilisation
 
@@ -60,7 +55,12 @@ pip install briefcase
 Pour lancer l'application en mode développement:
 
 ```bash
-briefcase dev
+uv run briefcase dev
+```
+
+Ou utilisez le script PowerShell fourni:
+```powershell
+.\run.ps1
 ```
 
 ### Construction de l'application
@@ -69,31 +69,31 @@ briefcase dev
 
 ```bash
 # Créer l'application
-briefcase create windows
+uv run briefcase create windows
 
 # Construire l'application
-briefcase build windows
+uv run briefcase build windows
 
 # Générer le package MSI
-briefcase package windows --no-sign
+uv run briefcase package windows --no-sign
 ```
 
-Le fichier MSI sera généré dans le dossier `windows/`.
+Le fichier MSI sera généré dans le dossier `dist/`.
 
 #### macOS
 
 ```bash
-briefcase create macOS
-briefcase build macOS
-briefcase package macOS
+uv run briefcase create macOS
+uv run briefcase build macOS
+uv run briefcase package macOS
 ```
 
 #### Linux
 
 ```bash
-briefcase create linux
-briefcase build linux
-briefcase package linux
+uv run briefcase create linux
+uv run briefcase build linux
+uv run briefcase package linux
 ```
 
 ## Structure du projet
@@ -119,23 +119,39 @@ excel_manipulation_couleur_beeware/
 
 ## Développement
 
+### Ajouter une nouvelle dépendance
+
+```bash
+# Dépendance de production
+uv add nom-du-package
+
+# Dépendance de développement
+uv add --dev nom-du-package
+```
+
 ### Exécuter les tests
 
 ```bash
-pytest
+uv run pytest
 ```
 
 ### Formatage du code
 
 ```bash
-black src/
+uv run black src/
 ```
 
 ### Vérification de la qualité du code
 
 ```bash
-flake8 src/
-mypy src/
+uv run flake8 src/
+uv run mypy src/
+```
+
+### Mettre à jour les dépendances
+
+```bash
+uv sync
 ```
 
 ## Licence
