@@ -2,12 +2,13 @@
 Point d'entrée principal de l'application ColorExcel.
 """
 
+import asyncio
+import logging
+import shutil
+from pathlib import Path
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-import logging
-import asyncio
-from pathlib import Path
 
 from .logic import get_sheet_names, apply_colors_to_file2
 
@@ -16,6 +17,10 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Constantes UI
+TITLE_FONT_SIZE = 22
+SECTION_FONT_SIZE = 16
 
 
 class ColorExcel(toga.App):
@@ -32,12 +37,18 @@ class ColorExcel(toga.App):
 
         Cette méthode est appelée automatiquement au démarrage de l'application.
         """
+        # Définir l'icône de l'application
+        self.icon = "resources/logo.png"
+        
         # Initialisation des variables d'état
         self.source_file_path = None
         self.source_sheet_name = None
         self.target_file_path = None
         self.target_sheet_name = None
         self.processed_file_path = None
+        
+        self.commands.clear()
+        
 
         # Conteneur principal
         main_box = toga.Box(style=Pack(direction=COLUMN, margin=10))
@@ -45,16 +56,34 @@ class ColorExcel(toga.App):
         # Titre de l'application
         title_label = toga.Label(
             "Manipulation de fichiers Excel",
-            style=Pack(margin=(0, 10), font_size=22, font_weight="bold"),
+            style=Pack(margin=(0, 10), font_size=TITLE_FONT_SIZE, font_weight="bold",text_align="center"),
         )
 
-        # Divider après le titre
+        # Boutons de contrôle (À propos et Quitter) juste après le titre
+        control_buttons_box = toga.Box(style=Pack(direction=ROW, margin=(5, 0)))
+        
+        about_button = toga.Button(
+            "À propos",
+            on_press=self.show_about,
+            style=Pack(margin=5, flex=1),
+        )
+        
+        exit_button = toga.Button(
+            "Quitter",
+            on_press=self.exit_app,
+            style=Pack(margin=5, flex=1),
+        )
+        
+        control_buttons_box.add(about_button)
+        control_buttons_box.add(exit_button)
+
+        # Divider après les boutons de contrôle
         divider1 = toga.Divider(style=Pack(margin=(5, 0)))
 
         # Section Fichier Source
         source_section_label = toga.Label(
             "Fichier Source",
-            style=Pack(margin=(10, 5), font_size=16, font_weight="bold"),
+            style=Pack(margin=(10, 5), font_size=SECTION_FONT_SIZE, font_weight="bold", text_align="center"),
         )
 
         self.source_button = toga.Button(
@@ -82,7 +111,7 @@ class ColorExcel(toga.App):
         # Section Fichier Cible
         target_section_label = toga.Label(
             "Fichier Cible",
-            style=Pack(margin=(10, 5), font_size=16, font_weight="bold"),
+            style=Pack(margin=(10, 5), font_size=SECTION_FONT_SIZE, font_weight="bold", text_align="center"),
         )
 
         self.target_button = toga.Button(
@@ -117,14 +146,12 @@ class ColorExcel(toga.App):
 
         # Barre de progression (initialement cachée)
         self.progress_box = toga.Box(style=Pack(direction=COLUMN, margin=(10, 0)))
-        self.progress_bar = toga.ProgressBar(
-            max=None, style=Pack(margin=5, flex=1)  # Mode indéterminé
+        self.progress_label = toga.Label(
+            "⏳ Traitement en cours",
+            style=Pack(margin=10, text_align="center", font_size=14, font_weight="bold")
         )
-        progress_label = toga.Label(
-            "Traitement en cours...", style=Pack(margin=(0, 5), text_align="center")
-        )
-        self.progress_box.add(progress_label)
-        self.progress_box.add(self.progress_bar)
+        self.progress_box.add(self.progress_label)
+        self.progress_animation_task = None
 
         # Message de résultat (initialement caché)
         self.result_box = toga.Box(style=Pack(direction=COLUMN, margin=(10, 0)))
@@ -150,6 +177,7 @@ class ColorExcel(toga.App):
 
         # Ajout des widgets au conteneur principal
         main_box.add(title_label)
+        main_box.add(control_buttons_box)
         main_box.add(divider1)
         main_box.add(source_section_label)
         main_box.add(self.source_button)
@@ -172,6 +200,32 @@ class ColorExcel(toga.App):
         self.main_window.show()
 
         logger.info("Application démarrée")
+
+    async def exit_app(self, widget):
+        """
+        Quitte l'application.
+
+        Args:
+            widget: Le widget qui a déclenché l'événement
+        """
+        self.exit()
+
+    async def show_about(self, widget):
+        """
+        Affiche la boîte de dialogue About ColorExcel.
+
+        Args:
+            widget: Le widget qui a déclenché l'événement
+        """
+        await self.main_window.dialog(
+            toga.InfoDialog(
+                "About ColorExcel",
+                "ColorExcel\n\n"
+                "Version: 1.0\n"
+                "Auteur: Adrien Mertens\n\n"
+                "Application de manipulation de couleurs dans fichiers Excel"
+            )
+        )
 
     async def select_source_file(self, widget):
         """
@@ -334,6 +388,23 @@ class ColorExcel(toga.App):
         self.process_button.enabled = all_selected
         logger.debug(f"Bouton de traitement activé: {all_selected}")
 
+    async def animate_progress(self):
+        """
+        Anime le label de progression avec des points qui bougent.
+        """
+        frames = [
+            "⏳ Traitement en cours",
+            "⏳ Traitement en cours.",
+            "⏳ Traitement en cours..",
+            "⏳ Traitement en cours...",
+        ]
+        frame_index = 0
+        
+        while True:
+            self.progress_label.text = frames[frame_index]
+            frame_index = (frame_index + 1) % len(frames)
+            await asyncio.sleep(0.5)  # Change toutes les 0.5 secondes
+
     async def start_processing(self, widget):
         """
         Lance le traitement de copie des couleurs.
@@ -350,39 +421,46 @@ class ColorExcel(toga.App):
         self.source_sheet_selection.enabled = False
         self.target_sheet_selection.enabled = False
 
-        # Afficher la barre de progression
+        # Afficher le message de progression
         if self.progress_box not in self.main_window.content.children:
             self.main_window.content.add(self.progress_box)
 
-        # Démarrer l'animation de la barre de progression
-        self.progress_bar.start()
+        # Démarrer l'animation de progression
+        self.progress_animation_task = asyncio.create_task(self.animate_progress())
 
         try:
-            # Exécuter le traitement dans un thread pour ne pas bloquer l'UI
-            await asyncio.sleep(0.1)  # Permet à l'UI de se mettre à jour
-
-            # Appel de la fonction de traitement
-            apply_colors_to_file2(
+            # Appel de la fonction de traitement dans un thread séparé
+            # pour ne pas bloquer l'interface utilisateur
+            output_file = await asyncio.to_thread(
+                apply_colors_to_file2,
                 self.source_file_path,
                 self.source_sheet_name,
                 self.target_file_path,
                 self.target_sheet_name,
             )
 
+            if output_file is None:
+                raise Exception("Erreur lors de la création du fichier coloré")
+
             # Sauvegarder le chemin du fichier traité
-            self.processed_file_path = self.target_file_path
+            self.processed_file_path = output_file
 
             logger.info("Traitement terminé avec succès")
 
-            # Arrêter la barre de progression
-            self.progress_bar.stop()
+            # Arrêter l'animation
+            if self.progress_animation_task:
+                self.progress_animation_task.cancel()
+                try:
+                    await self.progress_animation_task
+                except asyncio.CancelledError:
+                    pass
 
-            # Cacher la barre de progression
+            # Cacher le message de progression
             if self.progress_box in self.main_window.content.children:
                 self.main_window.content.remove(self.progress_box)
 
             # Afficher le message de succès
-            self.result_label.text = "Traitement terminé avec succès!"
+            self.result_label.text = "Traitement terminé ! Cliquez sur 'Enregistrer sous...'"
             if self.result_box not in self.main_window.content.children:
                 self.main_window.content.add(self.result_box)
 
@@ -394,17 +472,22 @@ class ColorExcel(toga.App):
             await self.main_window.dialog(
                 toga.InfoDialog(
                     "Succès",
-                    f"Les couleurs ont été appliquées avec succès au fichier:\n{Path(self.target_file_path).name}",
+                    "Le traitement est terminé avec succès !\n\nCliquez sur 'Enregistrer sous...' pour sauvegarder le fichier.",
                 )
             )
 
         except Exception as e:
             logger.error(f"Erreur lors du traitement: {e}", exc_info=True)
 
-            # Arrêter la barre de progression
-            self.progress_bar.stop()
+            # Arrêter l'animation
+            if self.progress_animation_task:
+                self.progress_animation_task.cancel()
+                try:
+                    await self.progress_animation_task
+                except asyncio.CancelledError:
+                    pass
 
-            # Cacher la barre de progression
+            # Cacher le message de progression
             if self.progress_box in self.main_window.content.children:
                 self.main_window.content.remove(self.progress_box)
 
@@ -442,8 +525,8 @@ class ColorExcel(toga.App):
         try:
             logger.info("Ouverture du sélecteur pour enregistrer sous")
 
-            # Proposer un nom de fichier par défaut
-            original_path = Path(self.processed_file_path)
+            # Proposer un nom de fichier par défaut avec _colored
+            original_path = Path(self.target_file_path)
             default_name = f"{original_path.stem}_colored{original_path.suffix}"
 
             save_path = await self.main_window.dialog(
@@ -456,8 +539,6 @@ class ColorExcel(toga.App):
 
             if save_path:
                 # Copier le fichier traité vers le nouvel emplacement
-                import shutil
-
                 shutil.copy2(self.processed_file_path, str(save_path))
 
                 logger.info(f"Fichier enregistré sous: {save_path}")

@@ -1,16 +1,16 @@
 [tool.briefcase]
 project_name = "ColorExcel"
 bundle = "com.colorexcel"
-version = "0.1.0"
+version = "1.0"
 url = "https://github.com/user/colorexcel"
-author = "User"
-author_email = "user@example.com"
+author = "Adrien Mertens"
+author_email = "adrien.mertens@isbw.be"
 
 [tool.briefcase.app.colorexcel]
 formal_name = "ColorExcel"
 description = "Application de manipulation de couleurs dans fichiers Excel"
 long_description = """Une application de bureau développée avec Beeware/Toga pour manipuler les couleurs dans les fichiers Excel de manière intuitive."""
-# icon = "src/colorexcel/resources/colorexcel"  # Décommentez si vous avez une icône
+icon = "src/colorexcel/resources/icon.ico"
 sources = [
     "src/colorexcel",
 ]
@@ -54,7 +54,7 @@ requires = [
 
 # Si vous voulez spécifier des options d'empaquetage
 packaging_format = "msi"  # ou "zip" pour un portable
-# icon = "src/colorexcel/resources/colorexcel"  # Décommentez si vous avez une icône
+icon = "src/colorexcel/resources/logo"
 
 [tool.briefcase.app.colorexcel.iOS]
 requires = [
@@ -83,13 +83,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "colorexcel"
-version = "0.1.0"
+version = "1.0"
 description = "Application de manipulation de couleurs dans fichiers Excel"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
-    {name = "User", email = "user@example.com"},
+    {name = "Adrien Mertens", email = "user@example.com"},
 ]
 keywords = [
     "excel",

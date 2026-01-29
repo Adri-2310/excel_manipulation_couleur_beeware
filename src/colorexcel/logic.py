@@ -15,6 +15,39 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+# Constantes
+ALPHA_PREFIX = "FF"
+
+
+def apply_tint(rgb: tuple[int, int, int], tint: float) -> tuple[int, int, int]:
+    """
+    Apply tint to an RGB color.
+    
+    Args:
+        rgb: Tuple of (R, G, B) values
+        tint: Tint value (-1.0 to 1.0). Positive values lighten, negative darken.
+        
+    Returns:
+        Tuple of (R, G, B) values with tint applied
+    """
+    if tint == 0:
+        return rgb
+    
+    r, g, b = rgb
+    
+    if tint > 0:
+        # Lighten: interpolate towards white (255, 255, 255)
+        r = int(r + (255 - r) * tint)
+        g = int(g + (255 - g) * tint)
+        b = int(b + (255 - b) * tint)
+    else:
+        # Darken: interpolate towards black (0, 0, 0)
+        r = int(r * (1 + tint))
+        g = int(g * (1 + tint))
+        b = int(b * (1 + tint))
+    
+    return (r, g, b)
+
 
 def hex_to_rvb(hex_color: str) -> tuple[int, int, int] | None:
     """
@@ -28,13 +61,13 @@ def hex_to_rvb(hex_color: str) -> tuple[int, int, int] | None:
     """
     if hex_color is None:
         return None
-    if hex_color.startswith("FF"):
+    if hex_color.startswith(ALPHA_PREFIX):
         hex_color = hex_color[2:]
     try:
         r = int(hex_color[0:2], 16)
-        v = int(hex_color[2:4], 16)
+        g = int(hex_color[2:4], 16)
         b = int(hex_color[4:6], 16)
-        return (r, v, b)
+        return (r, g, b)
     except ValueError:
         logger.warning("Code couleur hex invalide : %s", hex_color, exc_info=True)
         return None
@@ -202,16 +235,23 @@ def get_implantation_colors(file_path: str, sheet_name: str) -> dict:
             if cell_impl.fill and cell_impl.fill.fill_type != "none":
                 bg_color = cell_impl.fill.fgColor
                 rvb_color = None
+                tint = getattr(bg_color, 'tint', 0.0) or 0.0  # Gérer le tint
 
                 if bg_color.type == "rgb":
                     rvb_color = hex_to_rvb(bg_color.rgb)
                 elif bg_color.type == "theme":
                     hex_color = theme_colors.get(bg_color.theme)
-                    rvb_color = hex_to_rvb(hex_color)
+                    if hex_color:
+                        rvb_color = hex_to_rvb(hex_color)
+                
+                # Appliquer le tint si présent
+                if rvb_color and tint != 0:
+                    rvb_color = apply_tint(rvb_color, tint)
 
                 # Ignorer les couleurs noires ou nulles
                 if rvb_color and rvb_color != (0, 0, 0):
                     data_colors[key] = rvb_color
+                    logger.debug(f"Couleur extraite pour {key}: RGB{rvb_color} (type: {bg_color.type}, tint: {tint})")
 
         return data_colors
     except Exception:
@@ -225,38 +265,53 @@ def get_implantation_colors(file_path: str, sheet_name: str) -> dict:
 
 def apply_colors_to_file2(
     file1_path: str, file1_sheet: str, file2_path: str, file2_sheet: str
-) -> None:
+) -> str | None:
     """
-    Apply colors from source file to target file based on matching Implantation, Nom, Prénom.
+    Apply colors from source file to a copy of target file based on matching Implantation, Nom, Prénom.
 
     Args:
         file1_path: Path to the source Excel file (with colors)
         file1_sheet: Sheet name in source file
         file2_path: Path to the target Excel file (to apply colors to)
         file2_sheet: Sheet name in target file
+        
+    Returns:
+        Path to the new colored file or None if error
     """
     if not os.path.exists(file2_path):
         logger.error("Fichier cible introuvable : %s", file2_path)
-        return
+        return None
+
+    # Créer un fichier temporaire pour le traitement
+    import tempfile
+    import shutil
+    from pathlib import Path
+    
+    temp_dir = tempfile.gettempdir()
+    original_path = Path(file2_path)
+    temp_file = Path(temp_dir) / f"colorexcel_temp_{original_path.name}"
+    
+    shutil.copy2(file2_path, temp_file)
+    logger.info(f"Fichier temporaire créé : {temp_file}")
 
     data_colors = get_implantation_colors(file1_path, file1_sheet)
 
     try:
-        workbook = load_workbook(file2_path)
+        workbook = load_workbook(temp_file)
     except Exception:
         logger.error(
             "Erreur lors de l'ouverture du fichier cible : %s",
-            file2_path,
+            temp_file,
             exc_info=True,
         )
-        return
+        return None
 
     try:
         if file2_sheet not in workbook.sheetnames:
             logger.error(
-                "Feuille cible introuvable : %s dans %s", file2_sheet, file2_path
+                "Feuille cible introuvable : %s dans %s", file2_sheet, temp_file
             )
-            return
+            return None
 
         sheet = workbook[file2_sheet]
 
@@ -270,7 +325,7 @@ def apply_colors_to_file2(
             },
         )
         if col_indices is None:
-            return
+            return None
 
         idx_impl = col_indices["implantation"]
         idx_nom = col_indices["nom"]
@@ -297,11 +352,13 @@ def apply_colors_to_file2(
                 for cell in row:
                     cell.fill = fill
 
-        workbook.save(file2_path)
-        logger.info("Couleurs appliquées avec succès à %s", file2_path)
+        workbook.save(temp_file)
+        logger.info("Couleurs appliquées avec succès au fichier temporaire : %s", temp_file)
+        return str(temp_file)
     except Exception:
         logger.error(
             "Erreur lors de l'application des couleurs au fichier cible", exc_info=True
         )
+        return None
     finally:
         workbook.close()
